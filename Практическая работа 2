@@ -1,0 +1,71 @@
+#include <iostream>  
+#include <ctime>  
+#include <chrono>  
+using namespace std;
+void filling_mass(int mass[], const int n)
+{
+    for (int i = 0; i < n; i++)
+    {
+        mass[i] = rand() % -100;
+    }
+}
+void shaker_sort(int mass[], int n, unsigned long long* sf, unsigned long long* mf)
+{
+    bool swapped = true;
+    int start = 0;
+    int end = n - 1;
+
+    while (swapped) {
+        swapped = false;
+        // Переместить самый большой элемент вправо  
+        for (int i = start; i < end; i++) {
+            if (mass[i] > mass[i + 1]) {
+                std::swap(mass[i], mass[i + 1]);
+                swapped = true;
+                (*mf)++;
+            }
+            (*sf)++;
+        }
+        end--;
+        // Переместить наименьший элемент влево  
+        for (int i = end; i > start; i--) {
+            if (mass[i] < mass[i - 1]) {
+                std::swap(mass[i], mass[i - 1]);
+                swapped = true;
+                (*mf)++;
+            }
+            (*sf)++;
+        }
+        start++;
+    }
+}
+void print(int mass[], int n)
+{
+    cout << "вывод массива: " << endl;
+    for (int i = 0; i < n; i++)
+    {
+        cout << "[" << mass[i] << "] ";
+    }
+    cout << endl;
+}
+int main()
+{
+    setlocale(0, "");
+    srand(time(NULL));
+    unsigned long long sf = 0, mf = 0;//сравнение, перестановки  
+    int n;
+    cout << "Введите n: ";
+    cin >> n;
+    int* mass = new int[n];
+    auto start = chrono::high_resolution_clock::now();
+    filling_mass(mass, n);
+    print(mass, n);
+    shaker_sort(mass, n, &sf, &mf);
+    print(mass, n);
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<float> duration = end - start;
+    cout << "sf = " << sf << endl;
+    cout << "mf = " << mf << endl;
+    cout << "sf + mf = " << sf + mf << endl;
+    cout << "duration = " << duration.count() << endl;
+}
