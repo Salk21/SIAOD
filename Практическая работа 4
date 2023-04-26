@@ -1,0 +1,210 @@
+#include <iostream>
+#include <ctime>
+
+using namespace std;
+void filling_arr(int arr[], const int n)
+{
+    for (int i = 0; i < n; i++)
+    {
+        arr[i] = rand() % 100;
+    }
+}
+void print(int arr[], int n)
+{
+    cout << "вывод массива" << endl;
+
+    for (int i = 0; i < n; i++)
+    {
+        cout << "[" << i << ":" << arr[i] << "]";
+    }
+    cout << endl;
+}
+void barrier(int arr[], const int n, const int key, unsigned long long* sf)
+{
+    int bar = 0;
+    arr[n] = key; // установка барьера 
+
+    int i = 0;
+    while (arr[i] != key)
+    {
+        (*sf)++;
+        i++;
+    }
+
+    if (i < n)
+    {
+        bar = i;
+        cout << "Ключ " << key << " найден в индексе " << bar << endl;
+    }
+    else
+    {
+        cout << "ключ " << key << " не найден в массиве" << endl;
+    }
+}
+
+void merge(int arr[], int left, int mid, int right, unsigned long long* sf) {
+    int i, j, k;
+    int n1 = mid - left + 1; // размер левой половины
+    int n2 = right - mid; // размер правой половины
+    int* L = new int[n1]; // создаем временный массив для хранения левой половины
+    int* R = new int[n2]; // создаем временный массив для хранения правой половины
+    for (i = 0; i < n1; i++)
+        L[i] = arr[left + i]; // копируем элементы левой половины во временный массив L
+    for (j = 0; j < n2; j++)
+        R[j] = arr[mid + 1 + j]; // копируем элементы правой половины во временный массив R
+    i = 0; // индекс для массива L
+    j = 0; // индекс для массива R
+    k = left; // индекс для исходного массива arr
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i]; // если элемент в левом массиве меньше или равен элементу в правом массиве, то записываем его в исходный массив
+            i++;
+        }
+        else {
+            arr[k] = R[j]; // иначе записываем элемент из правого массива
+            j++;
+        }
+        k++;
+    }
+    // копируем оставшиеся элементы из временных массивов L и R, если таковые есть
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void merge_sort(int arr[], int left, int right, unsigned long long* sf) {
+    if (left < right) {
+        int mid = left + (right - left) / 2; // находим средний индекс массива
+        merge_sort(arr, left, mid, sf); // сортируем левую половину массива
+        merge_sort(arr, mid + 1, right, sf); // сортируем правую половину массива
+        merge(arr, left, mid, right, sf); // объединяем две отсортированные половины
+    }
+}
+
+////
+
+void inv_merge(int arr[], int left, int mid, int right, unsigned long long* sf)
+{
+    int i, j, k;
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    int* L = new int[n1];
+    int* R = new int[n2];
+    for (i = 0; i < n1; i++)
+        L[i] = arr[left + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[mid + 1 + j];
+    i = 0;
+    j = 0;
+    k = left;
+    while (i < n1 && j < n2) {
+        if (L[i] >= R[j]) { // здесь меняем знак сравнения, чтобы сортировать в обратном порядке
+            arr[k] = L[i];
+            i++;
+        }
+        else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void inv_merge_sort(int arr[], int left, int right, unsigned long long* sf)
+{
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        inv_merge_sort(arr, left, mid, sf);
+        inv_merge_sort(arr, mid + 1, right, sf);
+        inv_merge(arr, left, mid, right, sf);
+    }
+}
+
+
+
+
+int main()
+{
+    setlocale(0, "");
+    srand(time(NULL));
+    unsigned long long sf = 0;
+    int n, key, var = 0;
+    cout << "Введите размерность массива: ";
+    cin >> n;
+    int* arr = new int[n + 1];
+    cout << "Введите ключ: ";
+    cin >> key;
+    filling_arr(arr, n);
+    print(arr, n);
+
+    cout << "Введите действие:\n1) Поиск в массиве случайных чисел;\n2) Поиск в строго возростающем массиве;\n3) Поиск в строго убывающем массиве;\n4) Завершение проги" << endl;
+    while (var != 4) {
+        cin >> var;
+        if (var == 1)
+        {
+            clock_t start, end;
+            sf = 0;
+            start = clock();
+            barrier(arr, n, key, &sf);
+            end = clock();
+            printf("\nTime taken %4f sec ", ((double)end - start) / ((double)CLOCKS_PER_SEC));
+            cout << endl;
+            cout << "sf = " << sf << endl;
+        }
+        else if (var == 2)
+        {
+            clock_t start, end;
+            sf = 0;
+            start = clock();
+            merge_sort(arr, 0, n - 1, &sf);
+            end = clock();
+            print(arr, n);
+            barrier(arr, n, key, &sf);
+            printf("\nTime taken %4f sec ", ((double)end - start) / ((double)CLOCKS_PER_SEC));
+            cout << endl;
+            cout << "sf = " << sf << endl;
+        }
+        else if (var == 3)
+        { 
+            clock_t start, end;
+            sf = 0;
+            start = clock();
+            inv_merge_sort(arr, 0, n - 1, &sf);
+            end = clock();
+            print(arr, n);
+            barrier(arr, n, key, &sf);
+            printf("\nTime taken %4f sec ", ((double)end - start) / ((double)CLOCKS_PER_SEC));
+            cout << endl;
+            cout << "sf = " << sf << endl;
+        }
+        else if (var == 4)
+        {
+            cout << "Завершение программы";
+            return 0;
+        }
+        else
+        {
+            cout << "ERROR!";
+            return 0;
+        }
+    }
+    //barrier(arr, n, key, &sf);
+
+}
